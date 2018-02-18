@@ -4,7 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "start": "DEBUG=nniverse:* node ./bin/www"
+    "start": "DEBUG=nniverse:* node ./bin/www",
+    "eslint": "eslint app"
   },
   "repository": {
     "type": "git",
@@ -33,10 +34,12 @@
     "pg-hstore": "^2.3.2",
     "popper.js": "^1.12.9",
     "sequelize": "^4.28.6",
-    "serve-favicon": "^2.4.5"
+    "serve-favicon": "^2.4.5",
+    "browserify": "^16.1.0"
   },
   "devDependencies": {
     "express-generator": "^4.15.5",
-    "sequelize-cli": "^3.2.0"
+    "sequelize-cli": "^3.2.0",
+    "eslint": "^4.16.0"
   }
 }
