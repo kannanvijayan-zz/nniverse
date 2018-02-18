@@ -86,6 +86,6 @@ class MersenneTwister {
         this.mti = 0;
     }
     generateY(kk, kkn) {
-        return this.mt[kk] & UPPER_MASK)|(this.mt[kkn] & LOWER_MASK;
+        return (this.mt[kk] & UPPER_MASK)|(this.mt[kkn] & LOWER_MASK);
     }
 }

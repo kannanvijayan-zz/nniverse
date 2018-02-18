@@ -1,4 +1,6 @@
 
+"use strict";
+
 function forEachArray(arr, cb) {
     let r;
     for (let i = 0; i < arr.length; i++) {
@@ -29,4 +31,5 @@ function gaussianBoxMuller(u, v) {
 module.exports = {
     forEachArray, genForEachArray,
     forEachSet, genForEachSet,
-    gaussianBoxMuller };
+    gaussianBoxMuller
+};

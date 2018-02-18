@@ -1,9 +1,9 @@
 
 "use strict";
 
+const {forEachArray} = require("./helpers");
 const {Gene} = require("./genes");
 const {Network} = require("./network");
-const {forEachArray} = require("./helpers");
 
 // A genome is characterized by a list of Genes that specify the
 // structure of a neural network.  Multiple genomes may share a
