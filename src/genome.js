@@ -1,6 +1,7 @@
 
 "use strict";
 
+const assert = require("assert");
 const {forEachArray} = require("./helpers");
 const {Gene} = require("./genes");
 const {Network} = require("./network");
@@ -101,8 +102,7 @@ class Genome {
         // Create an ordering of all nodes and edges by activation order.
         const actOrder = new Ordering(this);
         // Save the list of nodes and edges at every order number.
-        this.nodesByStage = actOrder.getNodesByStage();
-        this.edgesByStage = actOrder.getEdgesByStage();
+        this.nodeEdgeStages = actOrder.getStages();
 
         //
         // INIT_OFFSETS
@@ -115,7 +115,7 @@ class Genome {
         let weightOffset = 0;
         let stateOffset = 0;
         let traceOffset = 0;
-        this.forEachNodeByStage(descr => {
+        this.forEachNodeAndEdgeByStage(descr => {
             if (descr.numWeightVars > 0) {
                 descr.setWeightOffset(weightOffset);
                 weightOffset += descr.numWeightVars;
@@ -153,7 +153,7 @@ class Genome {
         return forEachArray(this.geneList, cb);
     }
     forEachInputDescriptor(cb) {
-        const descrList = this.descrlist;
+        const descrList = this.descrList;
         const numInputs = this.simulation.numInputs;
         let r;
         for (let i = 0; i < numInputs; i++) {
@@ -187,21 +187,39 @@ class Genome {
     //  * An iteration from start to finish visits each node N such
     //    that all nodes producing feed-forward input to N to are
     //    already visited.
-    forEachNodeByStage(cb, skipFirst=false) {
-        const nodesByStage = this.nodesByStage;
-        const first = skipFirst ? 1 : 0;
-        for (let s = first; s < nodesByStage.length; s++) {
-            const stageNodes = nodesByStage[s];
-            let r;
+    forEachNodeAndEdgeByStage(cb) {
+        const nstages = this.nodeEdgeStages.length;
+        let r;
+        for (let s = 0; s < nstages; s++) {
+            const stageNodes = this.nodeEdgeStages[s].nodes;
+            const stageEdges = this.nodeEdgeStages[s].edges;
             for (let i = 0; i < stageNodes.length; i++) {
                 r = cb(stageNodes[i], s, i);
                 if (r === false) { return false; }
             }
-            return r;
+            for (let i = 0; i < stageEdges.length; i++) {
+                r = cb(stageEdges[i], s, i);
+                if (r === false) { return false; }
+            }
         }
+        return r;
+    }
+    forEachNodeByStage(cb, startAt=0) {
+        assert(Number.isInteger(startAt));
+        assert(startAt >= 0 && startAt < this.nodeEdgeStages.length);
+        const nstages = this.nodeEdgeStages.length;
+        let r;
+        for (let s = startAt; s < nstages; s++) {
+            const stageNodes = this.nodeEdgeStages[s].nodes;
+            for (let i = 0; i < stageNodes.length; i++) {
+                r = cb(stageNodes[i], s, i);
+                if (r === false) { return false; }
+            }
+        }
+        return r;
     }
     forEachNodeByStageSkipFirst(cb) {
-        return this.forEachNodeByStage(cb, /* skipFirst = */ true);
+        return this.forEachNodeByStage(cb, /* startAt = */ 1);
     }
 
     // Create a new network with this genome, empty weights.
@@ -365,11 +383,12 @@ class Ordering {
         // set appropriately.
     }
 
+    getStages() {
+        return this.stages.map(stage => { return { nodes: stage.nodes, edges: stage.edges }; });
+    }
+
     getNodesByStage() {
         return this.stages.map(stage => stage.nodes);
-    }
-    getEdgesByStage() {
-        return this.stages.map(stage => stage.edges);
     }
 
     getFf(descr) {
@@ -395,7 +414,7 @@ class Ordering {
             switch (node.geneKind()) {
             case Gene.Kinds.InputNode:
             case Gene.Kinds.HiddenNode:
-                node.forEachOutgoingEdge(edge => {
+                node.forEachOutputEdge(edge => {
                     // ASSERT: !this.seen.has(edge);
                     this.addEdge(edge, nextNodes);
                 });

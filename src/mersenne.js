@@ -1,4 +1,6 @@
 
+"use strict";
+
 const N = 624;
 const M = 397;
 const MATRIX_A = 0x9908b0df;
@@ -20,11 +22,11 @@ class MersenneTwister {
         this.initSeed(seed);
     }
 
-    initSeed(s) {
+    initSeed(seed) {
         // ASSERT: Number.isInteger(s) && s >= 0
-        this.mt[0] = s >>> 0;
+        this.mt[0] = seed >>> 0;
         for (let i = 1; i < N; i++) {
-            var s = this.mt[i - 1] ^ (this.mt[i-1] >>> 30);
+            const s = this.mt[i - 1] ^ (this.mt[i-1] >>> 30);
             this.mt[i] = ((((s >>> 16) * 1812433253) << 16) +
                           ((s & 0xffff) * 1812433253)) + i;
         }

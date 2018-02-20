@@ -21,9 +21,9 @@ class Simulation {
         this.numInputs = numInputs;
         this.numOutputs = numOutputs;
         this.numFixed = numInputs + numOutputs;
-        this.inputNodes = new Array(numInputs);
-        this.outputNodes = new Array(numOutputs);
-        this.startingEdges = new Array(numInputs + numOutputs);
+        this.inputNodes = [];
+        this.outputNodes = [];
+        this.startingEdges = [];
 
         // Map from lineageIds to genes for all genes in the genome.
         this.allGenesById = new Map();
@@ -33,16 +33,16 @@ class Simulation {
         // de-duplicate identical genes added during the same generation.
         this.allGenesByContent = new Map();
 
-        // Set of all geneLists ever created.
-        // Two identical geneLists can not be created because new geneLists
-        // are created by appending to previous ones, and new genes
-        // refer to their generation, and get a unique lineageId.
-        this.allGeneLists = new Set();
+        // Set of all genomes ever created.
+        this.allGenomes = new Set();
 
         // The current generation and associated info.
         this.generation = 0;
         this.currentGenomes = new Map();
         this.currentNetworks = new Map();
+
+        // The minimal genome with no hidden nodes.
+        this.minimalGenome = null;
 
         // Tracking ids
         this.nextLineageId = 1;
@@ -66,6 +66,10 @@ class Simulation {
                 this.startingEdges.push(this.createStartingEdgeGene(i, j));
             }
         }
+
+        // Create a minimal genome and add it.
+        // const genome0 = this.createMinimalGenome();
+        //this.addCurrentGenome(genome0);
     }
 
     genLineageId() {
@@ -114,7 +118,7 @@ class Simulation {
     // Creates a new gene with the given class and arguments, checking
     // for duplicates in the same generation.
     newGeneHelper(cls, ...args) {
-        const repr = this.generation + "/" + cls.genReprString(...args);
+        const repr = this.generation + "/" + cls.reprString(...args);
         let result = this.allGenesByContent.get(repr);
         if (!result) {
             const lineageId = this.genLineageId();
@@ -182,6 +186,13 @@ class Simulation {
     // Initialize a new minimal genome for the simulation.
     createMinimalGenome() {
         return new Genome(this.genGenomeId(), this, []);
+    }
+
+    addToCurrentGenome(genome) {
+        // ASSERT: genome.simulation === this
+        // ASSERT: ! this.currentGenomes.has(genome.genomeId)
+        this.allGenomes.add(genome);
+        this.currentGenomes.set(genome.genomeId, genome);
     }
 }
 

@@ -1,4 +1,6 @@
 
+"use strict";
+
 const {MersenneTwister} = require('./mersenne');
 
 // A random number generator factory G should satisfy the following

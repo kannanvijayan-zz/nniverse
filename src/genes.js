@@ -1,6 +1,7 @@
 
 "use strict";
 
+const assert = require('assert');
 const {forEachArray} = require("./helpers");
 const activation = require("./activation");
 
@@ -31,7 +32,7 @@ const GENE_KINDS = [
     GENE_KINDS.forEach(name => {
         GENE_KINDS[name] = name;
     });
-});
+})();
 Object.freeze(GENE_KINDS);
 
 class Gene {
@@ -48,9 +49,6 @@ class Gene {
             accum.push(":" + param);
         }
         return accum.join("");
-    }
-    genReprString(...params) {
-        return this.constructor.genReprString(...params);
     }
 
     // reprString()
@@ -97,26 +95,26 @@ class GeneDescriptor {
     geneKind() { return this.gene.kind; }
 
     setWeightOffset(offset) {
-        // ASSERT: Number.isInteger(offset) && offset >= 0
-        // ASSERT: this.weightOffset == -1
+        assert(Number.isInteger(offset) && offset >= 0)
+        assert(this.weightOffset == -1);
         this.weightOffset = offset;
     }
     setStateOffset(offset) {
-        // ASSERT: Number.isInteger(offset) && offset >= 0
-        // ASSERT: this.stateOffset == -1
+        assert(Number.isInteger(offset) && offset >= 0)
+        assert(this.stateOffset == -1)
         this.stateOffset = offset;
     }
     setTraceOffset(offset) {
-        // ASSERT: Number.isInteger(offset) && offset >= 0
-        // ASSERT: this.traceOffset == -1
+        assert(Number.isInteger(offset) && offset >= 0)
+        assert(this.traceOffset == -1)
         this.traceOffset = offset;
     }
     setDisabledBy(descr) {
         this.disabled = descr;
     }
     setStageNo(stageNo) {
-        // ASSERT: stageNo >= 0
-        // ASSERT: this.stageNo == -1
+        assert(stageNo >= 0)
+        assert(this.stageNo == -1)
         this.stageNo = stageNo;
     }
 
@@ -143,6 +141,8 @@ class InputNodeGene extends Gene {
 
     descriptor() { return new InputNodeDescriptor(this); }
 }
+InputNodeGene.geneKind = GENE_KINDS.InputNode;
+
 class InputNodeDescriptor extends GeneDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof InputNodeGene
@@ -175,6 +175,7 @@ class LinearGene extends Gene {
         this.actfName = actfName;
     }
 }
+
 class LinearDescriptor extends GeneDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof LinearGene
@@ -217,8 +218,10 @@ class OutputNodeGene extends LinearGene {
         return OutputNodeGene.reprString(this.actfName, this.outputNo);
     }
 
-    descriptor() { return OutputNodeDescriptor(this); }
+    descriptor() { return new OutputNodeDescriptor(this); }
 }
+OutputNodeGene.geneKind = GENE_KINDS.OutputNode;
+
 class OutputNodeDescriptor extends LinearDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof OutputNodeGene
@@ -243,8 +246,10 @@ class HiddenNodeGene extends LinearGene {
         return HiddenNodeGene.reprString(this.actfName, this.tag);
     }
 
-    descriptor() { return HiddenNodeDescriptor(this); }
+    descriptor() { return new HiddenNodeDescriptor(this); }
 }
+HiddenNodeGene.geneKind = GENE_KINDS.HiddenNode;
+
 class HiddenNodeDescriptor extends LinearDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof HiddenNodeGene
@@ -285,8 +290,10 @@ class NodeEdgeGene extends Gene {
         return NodeEdgeGene.reprString(this.fromNodeId, this.toNodeId);
     }
 
-    descriptor() { return NodeEdgeDescriptor(this); }
+    descriptor() { return new NodeEdgeDescriptor(this); }
 }
+NodeEdgeGene.geneKind = GENE_KINDS.NodeEdge;
+
 class NodeEdgeDescriptor extends GeneDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof NodeEdgeGene
@@ -340,8 +347,10 @@ class GateEdgeGene extends Gene {
         return GateEdgeGene.reprString(this.fromNodeId, this.targetEdgeId);
     }
 
-    descriptor() { return GateEdgeDescriptor(this); }
+    descriptor() { return new GateEdgeDescriptor(this); }
 }
+GateEdgeGene.geneKind = GENE_KINDS.GateEdge;
+
 class GateEdgeDescriptor extends GeneDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof GateEdgeGene
@@ -380,8 +389,10 @@ class DisableEdgeGene extends Gene {
         return DisableEdgeGene.reprString(this.disabledEdgeId);
     }
 
-    descriptor() { return DisableEdgeDescriptor(this); }
+    descriptor() { return new DisableEdgeDescriptor(this); }
 }
+DisableEdgeGene.geneKind = GENE_KINDS.DisableEdge;
+
 class DisableEdgeDescriptor extends GeneDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof GateEdgeGene
@@ -415,8 +426,10 @@ class DisableNodeGene extends Gene {
         return DisableNodeGene.reprString(this.disabledNodeId);
     }
 
-    descriptor() { return DisableNodeDescriptor(this); }
+    descriptor() { return new DisableNodeDescriptor(this); }
 }
+DisableNodeGene.geneKind = GENE_KINDS.DisableNode;
+
 class DisableNodeDescriptor extends GeneDescriptor {
     constructor(gene) {
         // ASSERT: gene instanceof GateNodeGene
