@@ -4,9 +4,10 @@
   "description": "",
   "private": true,
   "scripts": {
-    "start": "DEBUG=nniverse:* node ./bin/www",
+    "prep": "npm run browserify",
+    "start": "npm run prep && (DEBUG=nniverse:* node ./bin/www)",
     "browserify": "browserify ./src/gearworks.js -o ./public/js/gearworks.js",
-    "eslint": "eslint app"
+    "eslint": "eslint ./src/*"
   },
   "repository": {
     "type": "git",
